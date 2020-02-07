@@ -77,5 +77,23 @@ review:
 ## cgroups
 - control groups
   - originated at google. 
+  - for when processes are running together on the same serve, but in limited environments. 
+  - The problem is that if there is a runaway process, it may kill all the other processes. 
+  - It limits the amount of cpu, memory, bandwidth, etc. 
 - htop is a great cli tool to monitor processes. 
     - To install: ```apt-get install -y cgroup-tools htop```
+    - to use a cgroup, lets create one. 
+      - ```cgroup -g cpu, memory, blkio, devices, freezer:/sandbox```
+    - The cgroup commands need to be run from the host, not from within the group itself. 
+    - ```cgclassify -g cpu, memory, blkio, devices, freezer: sandbox PID``` - replace PID.
+    - ```cgset -r cpu.cfs_period_=100000 -r cpu.cfs_quota_us=$[ 5000 * $(getconf _NPROCESSES_ONLN)] sandbox```
+    - Limit the amount of megabytes to the sanbox group.
+      - ```cgset -r memory.limit_in_bytes=80M sandbox```
+
+- let's try to crash one of the instances. 
+  - in linux terminals, type ```yes```, and it will infinitly display `y`.
+  - You can also try ```yes crap``` and it will infinitly write `crap`
+  - You can also send this message to the "void" by typing ```yes > /dev/null```
+  - let's try to crash the memory now ```yes | tr \\n x | head -c 1048576000  | grep n```
+    - This will continually use up all the available memory. 
+
